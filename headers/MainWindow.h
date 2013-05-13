@@ -10,7 +10,8 @@ private:
 	Q_OBJECT
 	//These are the private member functions that are needed.
 	void update_Category();
-	void update_Database();
+	void update_Path();
+	void load_Tries();
 	//There are some of the private data members that are needed.
 	int categoryCount;	
 	int pathCount;

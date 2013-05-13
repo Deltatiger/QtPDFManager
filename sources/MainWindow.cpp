@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QTextStream>
 #include <QFileDialog>
+#include <QProcess>
 #include <QDir>
 
 using namespace std;
@@ -12,33 +13,66 @@ MainWindow::MainWindow()	{
 	setupUi(this);
 	//We start up the process
 	//We first set up some custom signals and stuffs 
-	connect(this, SIGNAL(callAddPath), this , SLOT(on_actAddPath_triggered));
+	connect(this, SIGNAL(callAddPath), this , SLOT(on_actAddPath_triggered()));
 	//Now init some variables
 	categoryCount = 0;
 	pathCount = 0;
 	//We set up the Combo box for categorys
 	update_Category();
 	//Now we have to set
-	update_Database();
+	update_Path();
 }
 
-void MainWindow::update_Database()	{
-	//This is used to completely delete the existing tries ( if the exist) and recreate them with the contents
+void MainWindow::load_Tries()	{	//To call this the category files must have been read.
+	//This is used to load the tries with the data from the Books.db file
 	if(THandlers != NULL)	{
-		//Already exists. Clear them out first
+		//We have somethign here. We first delete those.
+		for(int i = o; i < categoryCount; i++)	{
+			delete THandlers[i];
+		}
+		delete [] THandlers;
 	}
-	THandlers = new TrieHandler * [categoryCount];
-	for(int i = 0; i <= categoryCount; i++)	{
-		//We take into account the range from 0-9 and a-z including some special charecters
-		THandlers[i] = new TrieHandler(50, '0');
+	//Now we recreate stuff.
+	if(categoryCount < 1)	{
+		//We dont have any category's so lets just move on.
+		return;
+	} else {
+		//We have something.
+		//But first lets check if the DB file exists
+		if(QFile::exists(":/resources/Books.db"))	{
+			THandlers = new TrieHandler * [categoryCount];
+			for(int i = 0; i < categoryCount; i++)	{
+				//We create new Tries for each category
+				THandlers[i] = new TrieHandler(50, '0');
+			}
+			//Now we read the DB file
+			QFile dbFile(":/resources/Books.db");
+			if(dbFile.open(QIODevice::ReadOnly | QIODevice::Text))	{
+				QTextStream dbFileStream(&dbFile);
+				while(!dbFileStream.atEnd())	{
+					//We start reading the Data.
+					QString bookName, bookPath, bookCategory;
+					dbFileStream>>bookName>>bookPath>>bookCategory;
+					//Since book category is exactly the same as in the category file we get the index from the hash
+					int trieKey = categoryHash.value(bookCategory);
+					THandlers[trieKey]->insertWord(bookName);
+				}
+			}
+		} else {
+			//No DB file. Do Nothing for now.
+		}
 	}
+}
+
+void MainWindow::update_Path()	{
+	//This function is just used to update all the Path stuff
 	//We now check for the Path's
 	if(!QFile::exists(":/resources/pathList.txt"))	{
 		//There is a path file. If we dont have this we call the action Add Path
 		emit callAddPath();
 	} else {
 		QFile PathFile(":/resources/pathList.txt");
-		if(!PathFile.open(QIODevice::ReadOnly | QIODevice::Text))	{
+		if(PathFile.open(QIODevice::ReadOnly | QIODevice::Text))	{
 			//Now we have the file open , we load the stuff into the holders
 			QTextStream pathFile(&PathFile);
 			if(!pathFile.atEnd())	{
@@ -50,17 +84,19 @@ void MainWindow::update_Database()	{
 			pathCount = 0;
 			emit callAddPath();
 		}
+		//MOVE
 		//Now we have all the filenames in the HashMap we use that to read the files
 		for(int i = 0 ; i < pathCount; i++)	{
 			QString pathFile = pathHash.key(i);
 			//We need to get the pdf files from this folder now.
 			SysCommand::PerfomDirCommand(pathFile);
 			//Now we read the output file.
+			QFile outputFile("./out.txt");
+			if(outputFile.open(QIODevice::ReadOnly | QIODevice::Text))	{
+				QTextStream outputStream(&outputFile);
+			}
 		}
-	}
-	//Now that those are setup we starting seeing what files are open.
-	if(QFile::exists(":/resources/books.db"))	{
-		//There is an exisiting file. So we have a database. We start it.
+		//MOVE
 	}
 }
 
@@ -91,7 +127,8 @@ void MainWindow::on_actAddPath_triggered()	{
 		QTextStream outPathFile(&pathFile);
 		outPathFile<<folder<<endl;
 		pathFile.close();
-		update_Database();
+		update_Path();
+		load_Tries();
 	}
 }
 

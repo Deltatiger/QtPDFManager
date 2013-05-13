@@ -4,7 +4,7 @@
 using namespace std;
 
 void SysCommand::PerfomDirCommand(QString filePath)	{
-	QString command = "cmd /c dir /B " + filePath + " > out.txt";
+	QString command = "cmd /c dir /B " + filePath + "\\*.pdf > out.txt";
 	QProcess * process = new QProcess(0);
 	process->start(command);
 	process->waitForFinished(-1);
