@@ -32,6 +32,22 @@ void LinkList::clearAll()	{
 	eltCount = 0;
 }
 
+//This is only used for searching in HashMap
+string LinkList::listContent(string word)	{
+	//We only need to check the string before the ; as that is the filename
+	string firstPart;
+	Node * ptr = p;
+	while(ptr != NULL)	{
+		//We extract the first part then try matching it.
+		firstPart = p->data.substr(0, p->data.find(";"));
+		if(firstPart.compare(word) == 0)	{
+			return p->data;
+		}
+		ptr = ptr->link;
+	}
+	return "";
+}
+
 // Adds a new node at the end of the linkedlist
 bool LinkList::append(string tWord)  {
 	Node * newNode = new Node;

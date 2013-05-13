@@ -27,7 +27,7 @@ void MainWindow::load_Tries()	{	//To call this the category files must have been
 	//This is used to load the tries with the data from the Books.db file
 	if(THandlers != NULL)	{
 		//We have somethign here. We first delete those.
-		for(int i = o; i < categoryCount; i++)	{
+		for(int i = 0; i < categoryCount; i++)	{
 			delete THandlers[i];
 		}
 		delete [] THandlers;
@@ -55,7 +55,7 @@ void MainWindow::load_Tries()	{	//To call this the category files must have been
 					dbFileStream>>bookName>>bookPath>>bookCategory;
 					//Since book category is exactly the same as in the category file we get the index from the hash
 					int trieKey = categoryHash.value(bookCategory);
-					THandlers[trieKey]->insertWord(bookName);
+					THandlers[trieKey]->insertWord(bookName.toStdString());
 				}
 			}
 		} else {

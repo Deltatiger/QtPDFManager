@@ -19,6 +19,7 @@ public:
 	  LinkList();
 	  ~LinkList();
 	  bool append (std::string tWord); 
+	  std::string listContent(std::string fileName);
 	  std::string returnData();
 	  void clearAll();
 	  bool isEmpty();
