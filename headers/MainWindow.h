@@ -15,6 +15,7 @@ private:
 	int categoryCount;	
 	int pathCount;
 	QHash <QString , int> categoryHash;
+	QHash <QString , int> pathHash;
 	TrieHandler ** THandlers;
 private slots:
 	void on_textInput_textChanged();

@@ -19,7 +19,7 @@ MainWindow::MainWindow()	{
 	//We set up the Combo box for categorys
 	update_Category();
 	//Now we have to set
-	update_Database();
+	//update_Database();
 }
 
 void MainWindow::update_Database()	{
@@ -39,8 +39,13 @@ void MainWindow::update_Database()	{
 			//Now we have the file open , we load the stuff into the holders
 			QTextStream pathFile(&PathFile);
 			if(!pathFile.atEnd())	{
-
+				QString path = pathFile.readLine();
+				pathHash.insert(path, pathCount);
+				pathCount++;
 			}
+		} else {
+			pathCount = 0;
+			emit callAddPath();
 		}
 	}
 	//Now that those are setup we starting seeing what files are open.
@@ -51,8 +56,17 @@ void MainWindow::update_Database()	{
 
 void MainWindow::on_actAddPath_triggered()	{
 	//This is used to add a new path to the init Process
-	QString file = QFileDialog::getExistingDirectory();
-	textInput->setText(file);
+	QString folder = QFileDialog::getExistingDirectory();
+	//Now we have the folder name in the folder string
+	QFile pathFile(":/resources/paths.txt");
+	if(pathFile.open(QIODevice::Append))	{
+		QTextStream outPathFile(&pathFile);
+		outPathFile<<folder<<endl;
+		pathFile.close();
+	} else {
+		//Error. Cant Create File.
+	}
+
 }
 
 void MainWindow::update_Category()	{
@@ -79,10 +93,10 @@ void MainWindow::update_Category()	{
 				//Now we read and add everything to the combo box
 				QString option = categoryDB.readLine();
 				categoryCombo->addItem(option);
-				categoryHash.insert(option , catCount);
+				categoryHash.insert(option , categoryCount);
 				categoryCount++;
 			}
-			categoryHash.insert("All", catCount++);
+			categoryHash.insert("All", categoryCount++);
 			categoryCombo->addItem(QString("All"));
 		}
 		categoryFile.close();
